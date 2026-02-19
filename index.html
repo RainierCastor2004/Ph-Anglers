@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>PH Anglers — Community for Filipino Anglers</title>
+		<meta name="description" content="PH Anglers — share catches, tips, and connect with fellow anglers in the Philippines." />
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="brand">
+				<div class="logo">PH</div>
+				<div class="title">PH Anglers</div>
+			</div>
+			<nav class="main-nav">
+				<button id="nav-feed" class="nav-btn active">Feed</button>
+				<button id="nav-explore" class="nav-btn">Explore</button>
+				<button id="nav-profile" class="nav-btn">Profile</button>
+			</nav>
+			<div class="header-actions">
+				<input id="search" class="search" placeholder="Search anglers or posts..." />
+			</div>
+			<div class="auth-area">
+				<button id="login-btn" class="btn small">Log in</button>
+				<button id="logout-btn" class="btn small hidden">Log out</button>
+			</div>
+		</header>
+
+		<main class="layout">
+			<section class="main-col">
+				<div class="composer card">
+					<textarea id="post-text" placeholder="Share your catch, tip, or story..."></textarea>
+					<div class="composer-actions">
+						<input id="post-location" placeholder="Location (e.g., Palawan)" />
+						<button id="post-btn" class="btn">Post</button>
+					</div>
+				</div>
+
+				<div id="feed" class="feed"></div>
+				<div id="explore" class="feed hidden" aria-hidden="true"></div>
+				<div id="profile-view" class="card hidden" aria-hidden="true"></div>
+			</section>
+
+			<aside class="side-col">
+				<div class="card profile-card" id="profile-card">
+					<div class="profile-avatar" id="avatar">PH</div>
+					<div class="profile-info">
+						<div id="profile-name">Guest Angler</div>
+						<div id="profile-bio">Welcome to PH Anglers — join and share!</div>
+					</div>
+					<button id="edit-profile" class="btn small">Edit</button>
+				</div>
+
+				<div class="card trending">
+					<h4>Trending Spots</h4>
+					<ul id="trending-list"></ul>
+				</div>
+			</aside>
+		</main>
+
+		<div id="modal" class="modal hidden">
+			<div class="modal-content card">
+				<h3 id="modal-title">Profile</h3>
+				<label>Name<input id="modal-name" /></label>
+				<label>Bio<input id="modal-bio" /></label>
+				<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+					<button id="modal-save" class="btn">Save</button>
+					<button id="modal-cancel" class="btn ghost">Cancel</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Auth modal -->
+		<div id="auth-modal" class="modal hidden" aria-hidden="true">
+			<div class="modal-content card">
+				<div style="display:flex;gap:8px;margin-bottom:12px">
+					<button id="auth-tab-login" class="btn small active">Log in</button>
+					<button id="auth-tab-signup" class="btn small">Sign up</button>
+				</div>
+				<!-- Login form -->
+				<form id="login-form" style="display:block">
+					<label>Username<input id="login-username" required /></label>
+					<label>Password<input id="login-password" type="password" required /></label>
+					<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+						<button type="button" id="login-submit" class="btn">Log in</button>
+						<button type="button" id="auth-close" class="btn ghost">Close</button>
+					</div>
+				</form>
+				<!-- Signup form -->
+				<form id="signup-form" style="display:none">
+					<label>Username<input id="signup-username" required /></label>
+					<label>Password<input id="signup-password" type="password" required /></label>
+					<label>Name<input id="signup-name" required /></label>
+					<label>Bio<input id="signup-bio" /></label>
+					<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+						<button type="button" id="signup-submit" class="btn">Create account</button>
+						<button type="button" id="auth-close-2" class="btn ghost">Close</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<footer class="site-footer">© <span id="year"></span> PH Anglers</footer>
+
+		<script src="app.js" defer></script>
+	</body>
+</html>
+
