@@ -39,6 +39,11 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:
 .modal-content form label{display:block;margin:8px 0}
 .modal-content form input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(15,23,36,0.06)}
 .modal-content .active{background:rgba(14,165,164,0.12);color:var(--accent-2)}
+.search-results{position:absolute;left:0;right:0;top:44px;background:var(--card);border-radius:8px;box-shadow:0 8px 24px rgba(3,7,18,0.08);max-height:280px;overflow:auto;border:1px solid rgba(15,23,36,0.06);z-index:60}
+.search-results .item{padding:8px 10px;display:flex;gap:8px;align-items:center;cursor:pointer}
+.search-results .item:hover{background:rgba(14,165,164,0.06)}
+.search-results .item .meta{font-size:13px;color:var(--muted)}
+.hidden{display:none}
 .hidden{display:none}
 .modal-content{width:320px}
 .site-footer{text-align:center;color:var(--muted);padding:18px 0;margin-top:26px}

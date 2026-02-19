@@ -1,6 +1,7 @@
 // Simple SPA logic for PH Anglers (localStorage-backed)
 const STORAGE_KEY = 'ph_anglers_state_v1';
 let state = {profile:{name:'Guest Angler',bio:'Happy angler',avatarText:'PH',likedPosts:[]},posts:[],users:[],currentUser:null};
+let viewingUser = null; // when set, profile view shows this user's public profile
 
 function sampleData(){
   return [
@@ -72,16 +73,21 @@ function renderExplore(){
 function renderProfileView(){
   const el = q('profile-view');
   el.innerHTML = '';
+  const userToShow = viewingUser ? viewingUser : (state.currentUser ? getUser(state.currentUser) : null);
+  const profileData = userToShow ? {name:userToShow.name,bio:userToShow.bio,avatarText:userToShow.avatarText} : state.profile;
+
   const header = document.createElement('div'); header.style.display='flex'; header.style.justifyContent='space-between'; header.style.alignItems='center';
-  header.innerHTML = `<div><strong>${escapeHTML(state.profile.name)}</strong><div class="meta">${escapeHTML(state.profile.bio||'')}</div></div><div><button id="profile-edit-top" class="btn small">Edit Profile</button></div>`;
+  const editButtonHtml = (!viewingUser || (state.currentUser && viewingUser && viewingUser.username===state.currentUser)) ? `<button id="profile-edit-top" class="btn small">Edit Profile</button>` : '';
+  header.innerHTML = `<div><strong>${escapeHTML(profileData.name)}</strong><div class="meta">${escapeHTML(profileData.bio||'')}</div></div><div>${editButtonHtml}</div>`;
   el.appendChild(header);
 
-  const stats = document.createElement('div'); stats.style.marginTop='12px'; const myPosts = state.posts.filter(p=>p.author===state.profile.name);
+  const myPosts = state.posts.filter(p=>p.author===profileData.name);
+  const stats = document.createElement('div'); stats.style.marginTop='12px';
   stats.innerHTML = `<div class="meta">Posts: ${myPosts.length} • Likes received: ${ myPosts.reduce((s,p)=>s+(p.likes||0),0) }</div>`;
   el.appendChild(stats);
 
   const list = document.createElement('div'); list.style.marginTop='12px';
-  if(myPosts.length===0) list.innerHTML = '<div class="meta">You have not posted yet.</div>';
+  if(myPosts.length===0) list.innerHTML = '<div class="meta">No posts yet.</div>';
   myPosts.slice().sort((a,b)=>b.time-a.time).forEach(p=>{
     const article = document.createElement('article'); article.className='card post';
     article.innerHTML = `<div class="post-header"><div class="avatar">${p.avatar||p.author[0]||'P'}</div><div style="flex:1"><div><strong>${p.author}</strong><div class="meta">${p.location? p.location+' • ' : ''}${formatTime(p.time)}</div></div><div class="content">${escapeHTML(p.text)}</div></div></div><div class="actions"><span class="action">❤️ ${p.likes||0}</span><span class="action">💬 ${p.comments? p.comments.length:0}</span></div>`;
@@ -90,6 +96,30 @@ function renderProfileView(){
   el.appendChild(list);
   const topEdit = q('profile-edit-top'); if(topEdit) topEdit.onclick = openModal;
 }
+
+function searchUsers(query){
+  const container = q('search-results'); if(!container) return;
+  container.innerHTML = '';
+  if(!query || query.trim().length===0){ container.classList.add('hidden'); return }
+  const ql = query.toLowerCase();
+  const candidates = (state.users||[]).filter(u=>u.username.toLowerCase().includes(ql) || u.name.toLowerCase().includes(ql)).slice(0,10);
+  if(candidates.length===0){ container.innerHTML = `<div class="item"><div class="meta">No users found</div></div>`; container.classList.remove('hidden'); return }
+  candidates.forEach(u=>{
+    const div = document.createElement('div'); div.className='item'; div.setAttribute('role','option');
+    div.innerHTML = `<div class="avatar" style="width:36px;height:36px;border-radius:8px;font-size:14px">${escapeHTML(u.avatarText||u.name[0]||'U')}</div><div><div style="font-weight:700">${escapeHTML(u.name)}</div><div class="meta">@${escapeHTML(u.username)}</div></div>`;
+    div.onclick = ()=>{ viewUserProfile(u.username); container.classList.add('hidden'); }
+    container.appendChild(div);
+  })
+  container.classList.remove('hidden');
+}
+
+function viewUserProfile(username){ const user = getUser(username); if(!user) return alert('User not found'); viewingUser = user; setActiveNav('profile'); }
+
+// hide search results when clicking outside
+document.addEventListener('click', (e)=>{
+  const sr = q('search-results'); const s = q('search'); if(!sr || !s) return;
+  if(e.target===s || s.contains(e.target) || sr.contains(e.target)) return; sr.classList.add('hidden');
+});
 
 function renderFeed(filter=''){
   const feed = q('feed'); feed.innerHTML='';
@@ -147,7 +177,16 @@ function openModal(){ q('modal').classList.remove('hidden'); q('modal-name').val
 function closeModal(){ q('modal').classList.add('hidden') }
 function saveModal(){ state.profile.name = q('modal-name').value.trim()||state.profile.name; state.profile.bio = q('modal-bio').value.trim()||state.profile.bio; state.profile.avatarText = state.profile.name.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase(); saveState(); renderProfile(); closeModal(); }
 
-function bind(){ q('post-btn').onclick = postComposer; q('edit-profile').onclick = openModal; q('modal-cancel').onclick = closeModal; q('modal-save').onclick = saveModal; q('search').oninput = (e)=>{ renderFeed(e.target.value.trim().toLowerCase()) }
+function bind(){
+  q('post-btn').onclick = postComposer;
+  q('edit-profile').onclick = openModal;
+  q('modal-cancel').onclick = closeModal;
+  q('modal-save').onclick = saveModal;
+  const searchInput = q('search');
+  if(searchInput){
+    searchInput.oninput = (e)=>{ const v = e.target.value.trim().toLowerCase(); renderFeed(v); searchUsers(v); }
+    searchInput.onkeydown = (e)=>{ if(e.key==='Enter'){ const container = q('search-results'); if(container && !container.classList.contains('hidden') && container.firstChild){ const first = container.querySelector('.item'); if(first){ first.click(); e.preventDefault(); return; } } const v = e.target.value.trim().toLowerCase(); renderFeed(v); } }
+  }
   q('nav-feed').onclick = ()=>{ setActiveNav('feed') }
   q('nav-explore').onclick = ()=>{ setActiveNav('explore') }
   q('nav-profile').onclick = ()=>{ setActiveNav('profile') }
@@ -179,12 +218,14 @@ function setActiveNav(key){
     if(feedEl) feedEl.classList.remove('hidden');
     if(composer) composer.classList.remove('hidden');
     if(headerSearch) headerSearch.style.display = '';
+    viewingUser = null;
     renderFeed(q('search').value.trim().toLowerCase());
   } else if(key==='explore'){
     q('nav-explore').classList.add('active');
     if(exploreEl) exploreEl.classList.remove('hidden');
     if(composer) composer.classList.add('hidden');
     if(headerSearch) headerSearch.style.display = '';
+    viewingUser = null;
     renderExplore();
   } else {
     q('nav-profile').classList.add('active');

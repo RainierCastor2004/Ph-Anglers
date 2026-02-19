@@ -19,7 +19,10 @@
 				<button id="nav-profile" class="nav-btn">Profile</button>
 			</nav>
 			<div class="header-actions">
-				<input id="search" class="search" placeholder="Search anglers or posts..." />
+				<div style="position:relative">
+					<input id="search" class="search" placeholder="Search anglers or posts..." autocomplete="off" />
+					<div id="search-results" class="search-results hidden" role="listbox" aria-label="User search results"></div>
+				</div>
 			</div>
 			<div class="auth-area">
 				<button id="login-btn" class="btn small">Log in</button>
